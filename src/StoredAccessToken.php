@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Lattice\OAuth;
 
-final class AuthorizationCode
+final class StoredAccessToken
 {
     public function __construct(
-        public readonly string $code,
+        public readonly string $token,
         public readonly string $clientId,
         public readonly string|int $userId,
         public readonly array $scopes,
+        public readonly \DateTimeImmutable $issuedAt,
         public readonly \DateTimeImmutable $expiresAt,
-        public readonly ?string $redirectUri = null,
-        public readonly ?string $codeChallenge = null,
-        public readonly ?string $codeChallengeMethod = null,
-        public bool $used = false,
+        public readonly ?string $refreshTokenFamily = null,
+        public bool $revoked = false,
     ) {}
 
     public function isExpired(): bool
@@ -23,8 +22,8 @@ final class AuthorizationCode
         return $this->expiresAt < new \DateTimeImmutable();
     }
 
-    public function hasPkce(): bool
+    public function isActive(): bool
     {
-        return $this->codeChallenge !== null;
+        return !$this->revoked && !$this->isExpired();
     }
 }
